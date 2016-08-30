@@ -1,0 +1,187 @@
+<div class="container-fluid" ng-controller="DiseaseController">
+    <div class="row row-content">
+        <p style="padding:10px;"></p>
+        <div class="col-xs-12 col-md-6">
+          <div class="panel panel-success">
+            <div class="panel-heading">
+              Disease Tree
+            </div>
+            <div class="panel-body">
+              <div class="col-xs-12" style="background-color: #f5f5f5;" ng-if="!treeLoaded">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+              </div>
+              <div class="col-xs-12" style="background-color: #f5f5f5;" ng-if="treeLoaded">
+                <treecontrol class="tree-classic" tree-model="treedata" on-selection="showSelected(node)" order-by="orderby" reverse-order="{{reverse}}"
+                expanded-nodes="expandedNodes" filter-expression="filterBy" filter-comparator="comparator">
+                  id: {{node.entityId}} <strong>{{node.entityName}}</strong> ({{node.childrenCount}})
+                </treecontrol>
+              </div>
+              <p style="padding:10px;"></p>
+              <div class="col-xs-12 col-md-6">
+                <p>Sort:</p>
+                <a ng-click="byName()"><button type="button" class="btn btn-block btn-primary btn-md">By name</button></a>
+                <a ng-click="byId()"><button type="button" class="btn btn-block btn-primary btn-md">By Id</button></a></br>
+                <input type="checkbox" ng-model="reverse"/> Reverse Order</br>
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <p>Simple filter:</p>
+                <input type="text" ng-model="filterBy"/>Filter by<br>
+                <input type="checkbox" ng-model="comparator"/> Exact (case-sensitive)
+              </div>
+    <!--           
+              <div class="col-xs-12 col-md-6">
+                <a ng-click="expand()">
+                  <button type="button" class="btn btn-primary btn-md">{{expandButtonName}}</button>
+                </a>
+              </div>
+     -->        
+            </div>
+        </div>
+      </div>
+        <div class="col-xs-12 col-md-6" ng-if="!dieseaseSelected">
+          <p>No disease selected</p>
+        </div>
+        <div class="col-xs-12 col-md-6" ng-if="dieseaseSelected">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              Edit Disease
+            </div>
+            <div class="panel-body">
+           <form editable-form name="diseaseForm" onaftersave="saveDisease()">
+              <div>
+                <span class="title">Id: <strong>{{disease.id || ''}}</strong></span>
+              </div>
+              <div>
+                <span class="title">Created on: <strong>{{disease.createdOn || ''}}</strong></span><br>
+                <span class="title">Updated on: <strong>{{disease.updatedOn || ''}}</strong></span>
+              </div>
+              <div>
+                <!-- editable disease name (text with validation) -->
+                <span class="title">Main disease name: </span>
+                <span editable-text="disease.name" e-name="name" onbeforesave="checkName($data)" e-required>{{ disease.name || '' }}</span>
+              </div> 
+
+              <div class="panel panel-default">
+                <div class="panel-heading">Synonyms</div>
+                <div class="panel-body">
+                 <!-- synonyms table -->
+                  <table class="table table-bordered table-hover table-condensed">
+                    <tr style="font-weight: bold">
+                      <td style="width:30%">Name</td>
+                      <td style="width:50%">Created on</td>
+                      <td style="width:10%"><span ng-show="diseaseForm.$visible">Action</span></td>
+                    </tr>
+                    <tr ng-repeat="synonym in disease.diseaseSynonyms">
+                      <td>
+                        <!-- editable synonym (text with validation) -->
+                        <span editable-text="synonym.name" e-form="diseaseForm" onbeforesave="checkSynonym($data)">
+                          {{ synonym.name || '' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ synonym.createdOn }}
+                        </span>
+                      </td>
+                      <td><button type="button" ng-show="diseaseForm.$visible" ng-click="deleteSynonym(synonym.id)" class="btn btn-danger pull-right">Delete</button></td>
+                    </tr>
+                  </table>
+                  <button type="button" ng-show="diseaseForm.$visible" ng-disabled="diseaseForm.$waiting" ng-click="addSynonym()" class="btn btn-default">Add synonym</button>
+                </div>
+              </div>
+
+              <div class="panel panel-default">
+                <div class="panel-heading">MedDRA</div>
+                <div class="panel-body">
+                 <!-- MedDRA table -->
+                  <table class="table table-bordered table-hover table-condensed">
+                    <tr style="font-weight: bold">
+                      <td style="width:30%">Term Code</td>
+                      <td style="width:30%">Name</td>
+                      <td style="width:30%">Created on</td>
+                      <td style="width:10%"><span ng-show="diseaseForm.$visible">Action</span></td>
+                    </tr>
+                    <tr ng-repeat="meddra in disease.diseaseMedDRAs">
+                      <td>
+                        <span e-form="diseaseForm">
+                          {{ meddra.preferredTermCode || '' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span e-form="diseaseForm">
+                          {{ meddra.name || '' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ meddra.createdOn }}
+                        </span>
+                      </td>
+                      <td><button type="button" ng-show="diseaseForm.$visible" ng-click="deleteMeddra(meddra.preferredTermCode)" class="btn btn-danger pull-right">Delete</button></td>
+                    </tr>
+                  </table>
+                  <button type="button" ng-show="diseaseForm.$visible" ng-disabled="diseaseForm.$waiting" ng-click="addMeddra()" class="btn btn-default">Add MedDRA</button>
+                </div>
+              </div>
+
+              <div class="panel panel-default">
+                <div class="panel-heading">Therapeutic Activities</div>
+                <div class="panel-body">
+                 <!-- therapeutic activities table -->
+                  <table class="table table-bordered table-hover table-condensed">
+                    <tr style="font-weight: bold">
+                      <td style="width:30%">Name</td>
+                      <td style="width:30%">Created on</td>
+                      <td style="width:10%"><span ng-show="diseaseForm.$visible">Action</span></td>
+                    </tr>
+                    <tr ng-repeat="theract in disease.diseaseTherapeuticActivities">
+                      <td>
+                        <span e-form="diseaseForm">
+                          {{ theract.name || '' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span>
+                          {{ theract.createdOn }}
+                        </span>
+                      </td>
+                      <td><button type="button" ng-show="diseaseForm.$visible" ng-click="deleteTheract(theract.id)" class="btn btn-danger pull-right">Delete</button></td>
+                    </tr>
+                  </table>
+                  <button type="button" ng-show="diseaseForm.$visible" ng-disabled="diseaseForm.$waiting" 
+                  ng-click="addTheract()" class="btn btn-default">Add Therapeutic Activity</button>
+                </div>
+              </div>
+<!--               <div>
+                 editable status (select-local)
+                <span class="title">Status: </span>
+                <span editable-select="user.status" e-name="status" e-ng-options="s.value as s.text for s in statuses">
+                  {{ (statuses | filter:{value: user.status})[0].text || 'Not set' }}
+                </span>
+              </div>  
+
+              <div>
+                 editable group (select-remote)
+                <span class="title">Group: </span>
+                <span editable-select="user.group" e-name="group" onshow="loadGroups()" e-ng-options="g.id as g.text for g in groups">
+                  {{ showGroup() }}
+                </span>
+              </div>
+ -->
+            </form>
+            </div>
+            <div class="panel-footer">
+                <!-- button to show form -->
+                <button type="button" class="btn btn-default" ng-click="diseaseForm.$show()" ng-show="!diseaseForm.$visible">
+                  Edit
+                </button>
+                <!-- buttons to submit / cancel form -->
+                <div class="btn-form" ng-show="diseaseForm.$visible">
+                  <button type="submit" ng-disabled="diseaseForm.$waiting" class="btn btn-primary">Save</button>
+                  <button type="button" ng-disabled="diseaseForm.$waiting" ng-click="diseaseForm.$cancel()" class="btn btn-default">Cancel</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>

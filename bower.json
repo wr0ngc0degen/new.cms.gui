@@ -1,0 +1,33 @@
+{
+  "name": "new.cms",
+  "version": "1.0.0",
+  "description": "Edit disease ontology",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "disease",
+    "cms"
+  ],
+  "authors": [
+    "Alena Litvinova"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "angular": "~1.4.7",
+    "angular-tree-control": "^0.2.26",
+    "angular-ui-router": "^0.3.1",
+    "angular-resource": "^1.5.8",
+    "angular-xeditable": "^0.2.0"
+  },
+  "resolutions": {
+    "angular": "1.5.8"
+  }
+}

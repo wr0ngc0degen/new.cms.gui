@@ -1,0 +1,51 @@
+<div class="container-fluid">
+    <div class="row row-content" ng-controller="TherActController">
+      <p style="padding:10px;"></p>
+      <div class="col-xs-12 col-md-6">
+          <div class="panel panel-success">
+            <div class="panel-heading">
+              Therapeutic Activities Tree
+            </div>
+            <div class="panel-body">
+              <div class="col-xs-12" style="background-color: #f5f5f5;" ng-if="!treeLoaded">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+              </div>
+              <div class="col-xs-12" style="background-color: #f5f5f5;" ng-if="treeLoaded">
+                <treecontrol class="tree-classic" tree-model="treedata" on-selection="showSelected(node)" order-by="orderby" reverse-order="{{reverse}}"
+                expanded-nodes="expandedNodes" filter-expression="filterBy" filter-comparator="comparator">
+                  id: {{node.entityId}} <strong>{{node.entityName}}</strong> ({{node.childrenCount}})
+                </treecontrol>
+              </div>
+              <p style="padding:10px;"></p>
+              <div class="col-xs-12 col-md-6">
+                <p>Sort:</p>
+                <a ng-click="byName()"><button type="button" class="btn btn-block btn-primary btn-md">By name</button></a>
+                <a ng-click="byId()"><button type="button" class="btn btn-block btn-primary btn-md">By Id</button></a></br>
+                <input type="checkbox" ng-model="reverse"/> Reverse Order</br>
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <p>Simple filter:</p>
+                <input type="text" ng-model="filterBy"/>Filter by<br>
+                <input type="checkbox" ng-model="comparator"/> Exact (case-sensitive)
+              </div>
+            </div>
+        </div>
+      </div>
+        <div ng-if="!therActSelected">
+        </div>
+        <div class="col-xs-12 col-sm-6" ng-if="therActSelected">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              Therapeutic Activity
+            </div>
+            <div class="panel-body">
+              <div>
+                <span class="title">Id: <strong>{{sel.entityId || ''}}</strong></span>
+              </div>
+              <div>
+                <span class="title">Name: <strong>{{sel.entityName || ''}}</strong></span>
+              </div> 
+            </div>
+        </div>
+    </div>
+</div>
